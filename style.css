@@ -1,0 +1,56 @@
+body{
+  background-color:black;
+}
+
+.native_mode{
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  margin: auto;
+  max-height: 100%;
+  max-width: 100%;
+}
+.zoomed_mode{
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  margin: auto;
+  max-height: 100%;
+  width: 100%;
+}
+
+#overlay {
+  pointer-events: none;
+  z-index: 1;
+  position: absolute;
+  width: 400px;
+  height: 500px;
+  background-color: rgba(0,0,0,0.6);
+  color:white;
+}
+
+#levels {
+  pointer-events: all;
+}
+
+#last_error { 
+  pointer-events: all;
+  width: 100%;
+  height: 50px;
+  overflow-y: scroll;
+  background-color: gray;
+} 
+
+
+#index {
+  overflow-x: hidden;
+}
+
+canvas { 
+    width: 100%;
+    height: 100px;
+}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="jquery.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="overlay">    
+    <div id="levels"></div>
+    <pre id="index"></pre><br/>
+    <span id="loading_ts"></span><br/>
+    <span id="lastloaded_ts"></span><br/>
+    <span id="current_ts"></span><br/>
+    <span id="buffer"></span><br/>
+    <span id="metadata"></span><br/>
+    <canvas id="bufferCanvas"></canvas>
+    <div id="last_error" readonly ></div>
+    
+  </div>
+  <video id="video" class="zoomed_mode" controls></video>
+  <script src="global.js"></script>
+  <script src="player.js"></script>
+</body>
+</html>

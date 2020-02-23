@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Native HLS Settings</title>
+		<style>body: { padding: 10px; }</style>
+	</head>
+	<body>
+		<script src="global.js"></script>
+		<p>
+		<label for="hlsjsSel">
+			hls.js version:  
+			<select id="hlsjsSel"></select>
+		 </label>
+		 </p>
+		 <p>
+		 <label for="cbDebug">
+		 	hls.js debug:
+			<input type="checkbox" id="cbDebug">
+		 </label>
+		 </p>
+		 <p>
+		 <label for="cbNative">
+		 	Maintain original video size:
+			<input type="checkbox" id="cbNative">
+		 </label>
+		 </p>
+		<button id="saveSettings">Save</button>
+		<span id="status"></span>
+  	</body>
+	<script src="options.js"></script>
+</html>
+
