@@ -4,13 +4,12 @@ Allows HLS playback in chrome and firefox browsers
 
 # Usage
 
-1. Install extension from [chrome webstore][]/[mozilla addons][]
-2. Click on any m3u8 link inside chrome/firefox to play it directly in a new tab
+1. goto chrome://extensions/
+2. enable developer mode
+3. click load unpacked button
+4. select this folder
+5. disable developer mode
 
-The extension can be disabled by clicking on the icon if the request filter on m3u8 links is too disruptive.
-
-[chrome webstore]: https://chrome.google.com/webstore/detail/native-hls-playback/emnphkkblegpebimobpbekeedfgemhof
-[mozilla addons]: https://addons.mozilla.org/en-US/firefox/addon/native_hls_playback/
 
 # Some Developer Notes 
 
