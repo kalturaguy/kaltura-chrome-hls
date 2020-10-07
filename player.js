@@ -3,7 +3,7 @@ var debug;
 var recoverDecodingErrorDate,recoverSwapAudioCodecDate;
 var pendingTimedMetadata = [];
 let lastInterval=null;
-
+let lastId3Tag=null;
 
 class Graph {
   
@@ -140,10 +140,16 @@ let bufferGraph=null;
 
 function getFileNameFromUrl(url) {
   let queryIndex=url.indexOf('?')
+  let postfix="";
+  let prefix="";
   if (queryIndex>0) {
     url=url.substring(0,queryIndex);
+    postfix="?...";
   }
-  return url.substring(url.lastIndexOf('/')+1);
+  if (url.indexOf("http")==0) {
+    prefix=".../"
+  }
+  return prefix+url.substring(url.lastIndexOf('/')+1)+postfix;
 }
 function updateOverlay(id,content)  {
   try {
@@ -191,7 +197,9 @@ function timeUpdateCallback() {
   var e = pendingTimedMetadata[0];
   pendingTimedMetadata = pendingTimedMetadata.slice(1);
   console.log('Metadata ' + e.value + " at " + e.pts + "s");
-  //updateOverlay('metadata',`<span>${e.value} ${e.pts}</span>`)
+  lastId3Tag=JSON.parse("{"+e.value.substring(0,e.value.indexOf("}")+1))
+  lastId3Tag.pts=e.pts;
+  updateOverlay('id3',`id3: <span>timstamp: ${lastId3Tag.timestamp} sequenceId:${lastId3Tag.sequenceId} pts: ${e.pts}</span>`)
 }
 
 
@@ -298,7 +306,16 @@ function playM3u8(url){
   hls.on(Hls.Events.LEVEL_LOADED,(id,args)=> {
     console.warn(args);
     document.getElementById("index").style.color = "white"
-    updateOverlay('index',`${args.networkDetails.responseText}`)
+    const lines  = args.networkDetails.responseText.split("\n");
+
+    const modified = lines.map( line=> {
+      if (line[0]!=="#") {
+        return getFileNameFromUrl(line)
+      }
+
+      return line;
+    })
+    updateOverlay('index',modified.join("\n"))
 
   });
   hls.on(Hls.Events.FRAG_CHANGED,(id,args)=> {
@@ -318,6 +335,11 @@ function playM3u8(url){
       bufferStats.addValue(buffer)
       updateOverlay('buffer',`buffer: ${buffer.toFixed(2)}`)
       bufferGraph.drawGraph(bufferStats.values,bufferStats.maxSize)
+      if (lastId3Tag) {
+        let absoluteTime = new Date((video.currentTime-lastId3Tag.pts)*1000 + lastId3Tag.timestamp);
+        let currentTime=new Date();
+        updateOverlay('absolute',`current frame: ${absoluteTime.toISOString()} latency: ${(currentTime-absoluteTime)/1000.0.toFixed(1)}sec`);
+      }
     }
   },100);
 
