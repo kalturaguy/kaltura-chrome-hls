@@ -99,7 +99,7 @@ class Graph {
 }
 class Stats {
   constructor() {
-    this.maxSize=100
+    this.maxSize=1000
     this.clear()
   }
 
@@ -316,8 +316,13 @@ function playM3u8(url){
       return line;
     })
 
-    modified = modified.slice(0,12).concat(["........."]).concat(modified.slice(Math.max(12,modified.length-7)))
-    updateOverlay('index',modified.join("\n"))
+    const linesFromTop=15
+    const linesFromBottom=8
+    let shorter = modified.slice(0,linesFromTop);
+    if (modified.length>linesFromTop) {
+      shorter=shorter.concat(["......................"]).concat(modified.slice(Math.max(linesFromTop,modified.length-linesFromBottom-1)))
+    }
+    updateOverlay('index',shorter.join("\n"))
 
   });
   hls.on(Hls.Events.FRAG_CHANGED,(id,args)=> {
