@@ -308,13 +308,15 @@ function playM3u8(url){
     document.getElementById("index").style.color = "white"
     const lines  = args.networkDetails.responseText.split("\n");
 
-    const modified = lines.map( line=> {
+    let modified = lines.map( line=> {
       if (line[0]!=="#") {
         return getFileNameFromUrl(line)
       }
 
       return line;
     })
+
+    modified = modified.slice(0,12).concat(["........."]).concat(modified.slice(Math.max(12,modified.length-7)))
     updateOverlay('index',modified.join("\n"))
 
   });
