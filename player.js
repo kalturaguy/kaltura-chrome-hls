@@ -151,6 +151,20 @@ function getFileNameFromUrl(url) {
   }
   return prefix+url.substring(url.lastIndexOf('/')+1)+postfix;
 }
+
+const seqRegex = /index-(s\d+)\.m3u8/i;
+
+function getSequenceFromUrl(url) {
+  let fileName=getFileNameFromUrl(url)
+  let m=fileName.match(seqRegex)
+    if (m) {
+      console.warn(m)
+    return m[1]
+  } else {
+  }
+  return fileName;
+}
+
 function updateOverlay(id,content)  {
   try {
     document.getElementById(id).innerHTML=content;
@@ -246,7 +260,8 @@ function playM3u8(url){
 
       updateOverlay('levels',hls.levels.map( (level,index)=> {
         if (level.attrs){
-          return `<button id="level_button_${index}"  type="button">${level.attrs.RESOLUTION}</button>`;
+          let sequence= getSequenceFromUrl(level.url[0])
+          return `<button id="level_button_${index}"  type="button">${sequence} (${level.attrs.RESOLUTION}) (${(level.attrs.BANDWIDTH/1024).toFixed(0)}Kb)</button></br>`;
         }
       }).join(""));
 
@@ -308,21 +323,29 @@ function playM3u8(url){
     document.getElementById("index").style.color = "white"
     const lines  = args.networkDetails.responseText.split("\n");
 
-    let modified = lines.map( line=> {
+    let linesFromTop=-1
+
+    let modified = lines.map( (line,index)=> {
       if (line[0]!=="#") {
+        if (linesFromTop===-1) {
+          linesFromTop=(index-1)+4*2 //4 segments from top;
+        }
         return getFileNameFromUrl(line)
       }
 
       return line;
     })
 
-    const linesFromTop=15
-    const linesFromBottom=8
-    let shorter = modified.slice(0,linesFromTop);
-    if (modified.length>linesFromTop) {
-      shorter=shorter.concat(["......................"]).concat(modified.slice(Math.max(linesFromTop,modified.length-linesFromBottom-1)))
+    const linesFromBottom=4*2 //4 segments 
+
+    if (modified.length>linesFromBottom+linesFromTop) {
+      let shorter = modified.slice(0,linesFromTop);
+      let segmentsCut =  Math.max(0,(lines.length-linesFromBottom-linesFromTop-1)/2)
+      shorter=shorter.concat([`.... (${segmentsCut} segments) .....`]).concat(modified.slice(Math.max(linesFromTop,modified.length-linesFromBottom-1)))
+      updateOverlay('index',shorter.join("\n"))
+    } else {
+      updateOverlay('index',modified.join("\n"))
     }
-    updateOverlay('index',shorter.join("\n"))
 
   });
   hls.on(Hls.Events.FRAG_CHANGED,(id,args)=> {
