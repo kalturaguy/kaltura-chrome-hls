@@ -1,2 +1,2 @@
-var supportedVersions = ["0.14.16"]
+var supportedVersions = ["1.0.2"]
 var currentVersion = supportedVersions[0]
