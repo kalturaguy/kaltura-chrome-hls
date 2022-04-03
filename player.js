@@ -315,14 +315,14 @@ function playM3u8(url){
   });
   const map=new Map()
   hls.on(Hls.Events.FRAG_LOADED,(id,args)=> {
-    console.warn("frag changed",args.frag.sn);
+    //console.warn("frag changed",args.frag.sn);
     updateOverlay('loading_ts',`Loading: Idle`)
     updateOverlay('lastloaded_ts',`Loaded: ${getFileNameFromArgs(args)}`)// ${JSON.stringify(args.stats)}`)
     map.set(args.frag.sn,args.frag.url)
     
   });
   hls.on(Hls.Events.FRAG_CHANGED,(id,args)=> {
-    console.warn("frag changed",args.frag.sn);
+    //console.warn("frag changed",args.frag.sn);
     const url = map.get(args.frag.sn)
     updateOverlay('current_ts',`Current: ${getFileNameFromUrl(url)}`)
     if (map.size>1000) {
