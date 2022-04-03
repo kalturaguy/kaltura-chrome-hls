@@ -306,12 +306,28 @@ function playM3u8(url){
     });    
   });
 
+  const getFileNameFromArgs=(args)=> {
+    return getFileNameFromUrl(args.part ? args.part.url : args.frag.url)
+  }
+
   hls.on(Hls.Events.FRAG_LOADING,(id,args)=> {
-    updateOverlay('loading_ts',`Loading: ${getFileNameFromUrl(args.frag.url)}`)
+    updateOverlay('loading_ts',`Loading: ${getFileNameFromArgs(args)}`)
   });
+  const map=new Map()
   hls.on(Hls.Events.FRAG_LOADED,(id,args)=> {
+    console.warn("frag changed",args.frag.sn);
     updateOverlay('loading_ts',`Loading: Idle`)
-    updateOverlay('lastloaded_ts',`Loaded: ${getFileNameFromUrl(args.frag.url)}`)// ${JSON.stringify(args.stats)}`)
+    updateOverlay('lastloaded_ts',`Loaded: ${getFileNameFromArgs(args)}`)// ${JSON.stringify(args.stats)}`)
+    map.set(args.frag.sn,args.frag.url)
+    
+  });
+  hls.on(Hls.Events.FRAG_CHANGED,(id,args)=> {
+    console.warn("frag changed",args.frag.sn);
+    const url = map.get(args.frag.sn)
+    updateOverlay('current_ts',`Current: ${getFileNameFromUrl(url)}`)
+    if (map.size>1000) {
+      map.clear()
+    }
   });
   hls.on(Hls.Events.LEVEL_LOADING,(id,args)=> {
     document.getElementById("index").style.color = "blue"
@@ -319,7 +335,7 @@ function playM3u8(url){
 
   });
   hls.on(Hls.Events.LEVEL_LOADED,(id,args)=> {
-    console.warn(args);
+    //console.warn(args);
     document.getElementById("index").style.color = "white"
     const lines  = args.networkDetails.responseText.split("\n");
 
@@ -347,9 +363,6 @@ function playM3u8(url){
       updateOverlay('index',modified.join("\n"))
     }
 
-  });
-  hls.on(Hls.Events.FRAG_CHANGED,(id,args)=> {
-    updateOverlay('current_ts',`Current: ${getFileNameFromUrl(args.frag.url)}`)
   });
   hls.on(Hls.Events.FRAG_PARSING_METADATA, handleTimedMetadata);
 
