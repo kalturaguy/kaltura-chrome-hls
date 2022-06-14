@@ -40,47 +40,50 @@ class Graph {
 
   drawGraphAxis(min,max,boxSize){
 
-    let labelCount = 10;
-    let stepSize = boxSize / labelCount;
+    const labelCount = 10;
+    const stepSize = boxSize / labelCount;
+    const delta = max - min;
   
   
     this.context.fillStyle = '#000';
-    this.context.strokeStyle  = '#eee';
+    this.context.strokeStyle  = '#000';
     this.context.lineWidth = 1;
+
+    const fixed  =  (delta<7) ? 1 : 0
     for(let i = 0; i <= labelCount;i++){ 
       
-      let delta = max - min;
       
       let currentScale = (1 / labelCount) * i; 
       
-      let label =(min + (delta*currentScale)).toFixed(0)
+      let label =(min + (delta*currentScale)).toFixed(fixed)
       let y= ((stepSize * i) * -1 ) + boxSize 
-      this.context.fillText( label, 1, y ) ; 
+      this.context.fillText( label, 1, y-3 ) ; 
       this.drawLine(1,y,1000,y)
     }  
   }
   
   drawGraph(data,window){
 
+    let rightMargin=20
+
     this.context.clearRect(0, 0, this.myCanvas.width, this.myCanvas.height);  
     this.context.fillStyle = '#aaa';
     this.context.fillRect(0, 0, this.myCanvas.width, this.myCanvas.height);
-
-    this.drawLine(0,0,0,this.myCanvas.height);
-    this.drawLine(0,0,this.myCanvas.width,0);
-    this.drawLine(this.myCanvas.width,0,this.myCanvas.width,this.myCanvas.height);
-    this.drawLine(0,this.myCanvas.height,this.myCanvas.width,this.myCanvas.height);
+ 
+    this.context.strokeStyle  = '#000';
+    this.drawLine(rightMargin,0,rightMargin,this.myCanvas.height)
 
     let scale = this.calcScale(data,this.myCanvas.height);
 
-    let stepInPixel = this.myCanvas.width/window;
+    let stepInPixel = (this.myCanvas.width-rightMargin)/window;
     let multiplicatorY = scale.multiplicatorY;
     let offsetY = scale.offsetY;
 
-    let offset = 0;
+    let offset = rightMargin;
     let lastY = 0;
     this.context.strokeStyle  = '#111';
     this.context.lineWidth = 3;
+
     for(let i = Math.max(0,data.length-window); i < data.length;i++){
       let currentY =  ((data[i] * multiplicatorY) * -1) + (offsetY* multiplicatorY)   + this.myCanvas.height ;
       if(i == 0){
