@@ -231,6 +231,8 @@ function playM3u8(url){
   }
   if(hls){ hls.destroy(); }
   hls = new Hls({debug:debug});
+
+  console.warn("Hls version: ",Hls.version  )
   hls.on(Hls.Events.ERROR, function(event,data) {
     var  msg = "Player error: " + data.type + " - " + data.details;
     console.error(msg);
