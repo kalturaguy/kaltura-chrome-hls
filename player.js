@@ -216,7 +216,7 @@ function timeUpdateCallback() {
   console.log('Metadata ' + e.value + " at " + e.pts + "s");
   lastId3Tag=JSON.parse("{"+e.value.substring(0,e.value.indexOf("}")+1))
   lastId3Tag.pts=e.pts;
-  updateOverlay('id3',`id3: <span>timstamp: ${lastId3Tag.timestamp} sequenceId:${lastId3Tag.sequenceId} pts: ${e.pts}</span>`)
+  updateOverlay('id3',`id3: <span>timstamp: ${new Date(lastId3Tag.timestamp).toISOString()} sequenceId:${lastId3Tag.sequenceId} pts: ${e.pts.toFixed(2)}</span>`)
 }
 
 
