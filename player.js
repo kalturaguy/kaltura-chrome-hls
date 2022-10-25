@@ -170,7 +170,12 @@ function getSequenceFromUrl(url) {
 
 function updateOverlay(id,content)  {
   try {
-    document.getElementById(id).innerHTML=content;
+    const elm = document.getElementById(id);
+    if (elm) {
+      elm.innerHTML=content;
+    } else {
+      console.warn('missing element id',id)
+    }
   } 
   catch(e) {
     alert(e);
@@ -211,6 +216,7 @@ function timeUpdateCallback() {
   if (pendingTimedMetadata.length == 0 || pendingTimedMetadata[0].pts > video.currentTime) {
     return;
   }
+  return
   var e = pendingTimedMetadata[0];
   pendingTimedMetadata = pendingTimedMetadata.slice(1);
   console.log('Metadata ' + e.value + " at " + e.pts + "s");
@@ -316,20 +322,26 @@ function playM3u8(url){
   }
 
   hls.on(Hls.Events.FRAG_LOADING,(id,args)=> {
-    updateOverlay('loading_ts',`Loading: ${getFileNameFromArgs(args)}`)
+    updateOverlay(`loading_${args.frag.type}`,`Loading: ${getFileNameFromArgs(args)}`)
   });
   const map=new Map()
   hls.on(Hls.Events.FRAG_LOADED,(id,args)=> {
     //console.warn("frag changed",args.frag.sn);
-    updateOverlay('loading_ts',`Loading: Idle`)
-    updateOverlay('lastloaded_ts',`Loaded: ${getFileNameFromArgs(args)}`)// ${JSON.stringify(args.stats)}`)
-    map.set(args.frag.sn,args.frag.url)
+    updateOverlay(`loading_${args.frag.type}`,`Loading: Idle`)
+    updateOverlay(`lastloaded_${args.frag.type}`,`Loaded: ${getFileNameFromArgs(args)}`)// ${JSON.stringify(args.stats)}`)
+    map.set(args.frag.type + args.frag.sn ,args.frag.url)
     
   });
+  hls.on(Hls.Events.LEVEL_PTS_UPDATED,(id,args)=> {
+    
+    lastId3Tag = {
+      pts:args.start,
+      timestamp:args.frag.programDateTime
+    }
+  })
   hls.on(Hls.Events.FRAG_CHANGED,(id,args)=> {
-    //console.warn("frag changed",args.frag.sn);
-    const url = map.get(args.frag.sn)
-    updateOverlay('current_ts',`Current: ${getFileNameFromUrl(url)}`)
+    const url = map.get(args.frag.type  + args.frag.sn)
+    updateOverlay(`current_${args.frag.type}`,`Current: ${getFileNameFromUrl(url)}`)
     if (map.size>1000) {
       map.clear()
     }
@@ -369,6 +381,44 @@ function playM3u8(url){
     }
 
   });
+
+  hls.on(Hls.Events.SUBTITLE_TRACK_LOADING,(id,args)=> {
+    document.getElementById("subtitles").style.color = "blue"
+  });
+  
+  hls.on(Hls.Events.SUBTITLE_TRACK_LOADED,(id,args)=> {
+    //console.warn(args);
+    document.getElementById("subtitles").style.color = "white"
+    const lines  = args.networkDetails.responseText.split("\n");
+
+    let linesFromTop=-1
+
+    let modified = lines.map( (line,index)=> {
+      if (line[0]!=="#") {
+        if (linesFromTop===-1) {
+          linesFromTop=(index-1)+4*2 //4 segments from top;
+        }
+        return getFileNameFromUrl(line)
+      }
+
+      return line;
+    })
+
+    const linesFromBottom=4*2 //4 segments 
+
+    if (modified.length>linesFromBottom+linesFromTop) {
+      let shorter = modified.slice(0,linesFromTop);
+      let segmentsCut =  Math.max(0,(lines.length-linesFromBottom-linesFromTop-1)/2)
+      shorter=shorter.concat([`.... (${segmentsCut} segments) .....`]).concat(modified.slice(Math.max(linesFromTop,modified.length-linesFromBottom-1)))
+      updateOverlay('subtitles',shorter.join("\n"))
+    } else {
+      updateOverlay('subtitles',modified.join("\n"))
+    }
+
+  });
+  hls.on(Hls.Events.SUBTITLE_FRAG_PROCESSED,(id,args)=> {
+  });
+
   hls.on(Hls.Events.FRAG_PARSING_METADATA, handleTimedMetadata);
 
   
@@ -405,7 +455,7 @@ chrome.storage.local.get({
   if (supportedVersions.includes(settings.hlsjs)) {
     version = settings.hlsjs
   }
-  s.src = chrome.runtime.getURL('hlsjs/hls.'+version+'.min.js');
+  s.src = chrome.runtime.getURL('hlsjs/hls.'+version+'.js');
   s.onload = function() { 
     
     bufferGraph = new Graph("bufferCanvas")
