@@ -327,8 +327,8 @@ function playM3u8(url){
   const map=new Map()
   hls.on(Hls.Events.FRAG_LOADED,(id,args)=> {
     //console.warn("frag changed",args.frag.sn);
-    updateOverlay(`loading_${args.frag.type}`,`Loading: Idle`)
-    updateOverlay(`lastloaded_${args.frag.type}`,`Loaded: ${getFileNameFromArgs(args)}`)// ${JSON.stringify(args.stats)}`)
+    updateOverlay(`loading_${args.frag.type}`,`Loading ${args.frag.type}: Idle`)
+    updateOverlay(`lastloaded_${args.frag.type}`,`Loaded ${args.frag.type}: ${getFileNameFromArgs(args)}`)// ${JSON.stringify(args.stats)}`)
     map.set(args.frag.type + args.frag.sn ,args.frag.url)
     
   });
@@ -341,7 +341,7 @@ function playM3u8(url){
   })
   hls.on(Hls.Events.FRAG_CHANGED,(id,args)=> {
     const url = map.get(args.frag.type  + args.frag.sn)
-    updateOverlay(`current_${args.frag.type}`,`Current: ${getFileNameFromUrl(url)}`)
+    updateOverlay(`current_${args.frag.type}`,`Current ${args.frag.type}: ${getFileNameFromUrl(url)}`)
     if (map.size>1000) {
       map.clear()
     }
@@ -455,7 +455,7 @@ chrome.storage.local.get({
   if (supportedVersions.includes(settings.hlsjs)) {
     version = settings.hlsjs
   }
-  s.src = chrome.runtime.getURL('hlsjs/hls.'+version+'.js');
+  s.src = chrome.runtime.getURL('hlsjs/hls.'+version+'.min.js');
   s.onload = function() { 
     
     bufferGraph = new Graph("bufferCanvas")
