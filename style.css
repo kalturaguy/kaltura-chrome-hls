@@ -27,7 +27,7 @@ body{
   pointer-events: none;
   z-index: 1;
   position: absolute;
-  width: 400px;
+  width: 500px;
   height: auto;
   background-color: rgba(0,0,0,0.6);
   color:white;

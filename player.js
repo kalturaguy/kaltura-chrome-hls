@@ -379,7 +379,7 @@ function playM3u8(url){
     let linesFromTop=-1
 
     let modified = lines.map( (line,index)=> {
-      if (line[0]!=="#") {
+      if (line[0]!=="#" || line.startsWith('#EXT-X-PART')|| line.startsWith('#EXT-X-MAP')) {
         if (linesFromTop===-1) {
           linesFromTop=(index-1)+4*2 //4 segments from top;
         }
