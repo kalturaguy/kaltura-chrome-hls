@@ -100,6 +100,7 @@ class Graph {
   }
 
 }
+const map=new Map()
 class Stats {
   constructor() {
     this.maxSize=1000
@@ -324,12 +325,22 @@ function playM3u8(url){
   hls.on(Hls.Events.FRAG_LOADING,(id,args)=> {
     updateOverlay(`loading_${args.frag.type}`,`Loading: ${getFileNameFromArgs(args)}`)
   });
-  const map=new Map()
+
+  const getFileId=(args)=> {
+    const id = `${args.frag.type}_${args.frag.sn}_${args.part?.index}` 
+    return id
+  }
   hls.on(Hls.Events.FRAG_LOADED,(id,args)=> {
-    //console.warn("frag changed",args.frag.sn);
-    updateOverlay(`loading_${args.frag.type}`,`Loading ${args.frag.type}: Idle`)
-    updateOverlay(`lastloaded_${args.frag.type}`,`Loaded ${args.frag.type}: ${getFileNameFromArgs(args)}`)// ${JSON.stringify(args.stats)}`)
-    map.set(args.frag.type + args.frag.sn ,args.frag.url)
+
+    try {
+      const fileName = getFileNameFromArgs(args);
+      //console.warn("frag changed",args.frag.sn);
+      updateOverlay(`loading_${args.frag.type}`,`Loading ${args.frag.type}: Idle`)
+      updateOverlay(`lastloaded_${args.frag.type}`,`Loaded ${args.frag.type}: ${fileName}`)// ${JSON.stringify(args.stats)}`)
+      map.set(getFileId(args) ,fileName)
+    }catch(e) {
+      console.warn(e)
+    }
     
   });
   hls.on(Hls.Events.LEVEL_PTS_UPDATED,(id,args)=> {
@@ -340,10 +351,19 @@ function playM3u8(url){
     }
   })
   hls.on(Hls.Events.FRAG_CHANGED,(id,args)=> {
-    const url = map.get(args.frag.type  + args.frag.sn)
-    updateOverlay(`current_${args.frag.type}`,`Current ${args.frag.type}: ${getFileNameFromUrl(url)}`)
-    if (map.size>1000) {
-      map.clear()
+    
+    try {
+      const url = map.get(getFileId(args))
+      if (url) {
+        updateOverlay(`current_${args.frag.type}`,`Current ${args.frag.type}: ${getFileNameFromUrl(url)}`)
+      } else {
+        console.warn(`no url for ${getFileId(args)}`)
+      }
+      if (map.size>1000) {
+        //map.clear()
+      }
+    }catch(e) {
+      console.warn(e)
     }
   });
   hls.on(Hls.Events.LEVEL_LOADING,(id,args)=> {
