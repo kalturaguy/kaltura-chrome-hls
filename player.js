@@ -275,7 +275,25 @@ function playM3u8(url){
           let sequence= getSequenceFromUrl(level.url[0])
           return `<button id="level_button_${index}"  type="button">${sequence} (${level.attrs.RESOLUTION}) (${(level.attrs.BANDWIDTH/1024).toFixed(0)}Kb)</button></br>`;
         }
-      }).join(""));
+      }).join("")+'<button id="auto_change">auto change</button>');
+
+      
+      let elm=document.getElementById(`auto_change`);
+      let auto_change_interval=null;
+      if (elm) {
+        elm.onclick =  ()=> {
+          if (auto_change_interval) {
+            clearInterval(auto_change_interval);
+            auto_change_interval=null;
+            elm.innerText='auto change'
+          } else {
+            elm.innerText='stop change'
+            auto_change_interval=setInterval ( ()=> {
+              hls.loadLevel = (hls.loadLevel +1 ) % hls.levels.length;
+            },3000);
+          }
+        }
+      }
 
       hls.levels.forEach( (level,idx)=>  {
         let elm=document.getElementById(`level_button_${idx}`);
